@@ -17,6 +17,7 @@ This tool automates the first step: analyzing the store, syncing the data, and g
 ## ⚙️ Quick Start
 
 1. Analyze a store:
+```bash
 woo-migrate analyze https://example.com ck_xxx cs_xxx
 
 2. Sync products:
@@ -46,4 +47,4 @@ npm run dev
 
 ## 👤 Author
 
-Built by [Abhisharydv90](https://github.com/Abhisharydv90). let's talk.
+Built by Abhisharydv90 . let's talk.

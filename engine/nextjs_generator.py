@@ -6,7 +6,7 @@ NEXT_CONFIG = """
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: { domains: ['localhost'] },
+  images: { domains: ['localhost', 'via.placeholder.com', 'placehold.co'] },
 }
 module.exports = nextConfig
 """

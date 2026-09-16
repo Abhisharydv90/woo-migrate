@@ -38,7 +38,7 @@ func main() {
 	}
 
 	command := os.Args[1]
-	
+
 	exePath, _ := os.Executable()
 	exeDir := filepath.Dir(exePath)
 
@@ -49,16 +49,23 @@ func main() {
 			os.Exit(1)
 		}
 		runAnalyze(exeDir, os.Args[2], os.Args[3], os.Args[4])
-	
+
 	case "sync":
 		if len(os.Args) < 6 {
 			fmt.Println("❌ Usage: woo-migrate sync <store_url> <consumer_key> <consumer_secret> <output_dir>")
 			os.Exit(1)
 		}
 		runSync(exeDir, os.Args[2], os.Args[3], os.Args[4], os.Args[5])
-	
+
+	case "generate":
+		if len(os.Args) < 4 {
+			fmt.Println("❌ Usage: woo-migrate generate <products_json> <output_dir>")
+			os.Exit(1)
+		}
+		runGenerate(exeDir, os.Args[2], os.Args[3])
+
 	default:
-		fmt.Println("❌ Unknown command. Use 'analyze' or 'sync'.")
+		fmt.Println("❌ Unknown command. Use 'analyze', 'sync', or 'generate'.")
 		os.Exit(1)
 	}
 }
@@ -120,10 +127,38 @@ func runSync(exeDir, url, ck, cs, outputDir string) {
 	fmt.Printf("📁 Output File:    %s\n", result.OutputFile)
 }
 
+func runGenerate(exeDir, productsFile, outputDir string) {
+	fmt.Printf("🏗️  Generating Next.js storefront from %s...\n\n", productsFile)
+	pythonScript := filepath.Join(exeDir, "engine", "nextjs_generator.py")
+	cmd := exec.Command("python", pythonScript, productsFile, outputDir)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("❌ Error running generator: %v\n", err)
+		fmt.Printf("📄 Python Output (The REAL error):\n%s\n", string(output))
+		os.Exit(1)
+	}
+
+	var result map[string]interface{}
+	if err := json.Unmarshal(output, &result); err != nil {
+		fmt.Printf("❌ Error parsing output: %v\nRaw: %s\n", err, string(output))
+		os.Exit(1)
+	}
+
+	if result["status"] == "error" {
+		fmt.Printf("❌ Error: %s\n", result["message"])
+		os.Exit(1)
+	}
+
+	fmt.Printf("✅ Storefront Generated\n")
+	fmt.Printf("📁 Output Directory: %s\n", result["output_dir"])
+	fmt.Printf("📦 Products:         %v\n", result["products_generated"])
+}
+
 func printUsage() {
 	fmt.Println("WooCommerce Migration Toolkit")
 	fmt.Println("")
 	fmt.Println("Usage:")
 	fmt.Println("  woo-migrate analyze <store_url> <consumer_key> <consumer_secret>")
 	fmt.Println("  woo-migrate sync <store_url> <consumer_key> <consumer_secret> <output_dir>")
+	fmt.Println("  woo-migrate generate <products_json> <output_dir>")
 }

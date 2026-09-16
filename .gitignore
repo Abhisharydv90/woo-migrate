@@ -1,0 +1,19 @@
+# Go
+woo-migrate.exe
+*.exe
+
+# Node
+node_modules/
+.next/
+storefront/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test data
+products.json
